@@ -68,7 +68,7 @@ def score_pronunciation():
     accessKey = "ac679469-fbf1-4b08-abd7-f2aba1757ae6"
     audioFilePath = '/content/001_034.pcm'
     languageCode = "korean"
-    script = "형제 중에서 맏이가 제일 힘든 것 같아요."
+    
     file = open(audioFilePath, "rb")
     audioContents = base64.b64encode(file.read()).decode("utf8")
     file.close()
@@ -77,7 +77,7 @@ def score_pronunciation():
         "access_key": accessKey,
         "argument": {
         "language_code": languageCode,
-        "script": script, 
+        
         "audio": audioContents
         }
     }
@@ -96,7 +96,7 @@ def score_pronunciation():
     user = y["return_object"]['recognized']
     score = y["return_object"]['score'] 
 
-    return user, script, score*20
+    return user, score*20
 
 
 def tokenizing(tokenizer, text):
