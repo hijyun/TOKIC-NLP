@@ -96,7 +96,7 @@ def score_pronunciation():
     user = y["return_object"]['recognized']
     score = y["return_object"]['score'] 
 
-    return user, script, score
+    return user, script, score*20
 
 
 def tokenizing(tokenizer, text):
