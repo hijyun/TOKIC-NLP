@@ -6,6 +6,10 @@ from nltk.probability import FreqDist
 from gensim.models import Word2Vec
 from pydub import AudioSegment
 
+# 발음평가 api 불러올 때 필요
+import urllib3
+import json
+import base64
 
 
 def get_silence(audio_file, threshold, interval):
@@ -59,10 +63,40 @@ def score_fluency(audio, part_num):
 
 
 def score_pronunciation():
-    user = "제 취미는 영화 보기입니다. 저는 시간 있으면 영화관에 갑니다. 집에서도 영화를 가끔 봅니다. 저는 영화가 재밌어야 좋아해요. 슬픈 영화는 싫어해요. 저는 다음주 주말에 친구와 함께 영화관에 갈거예요."
-    answer = "제 취미는 영화 보기예요. 저는 시간 있을 때 영화관에 가요. 집에서도 영화를 자주 봐요. 저는 재미있는 영화를 좋아해요. 슬픈 영화도 잘 봐요. 저는 이번 주말에 친구와 함께 영화관에 갈 거예요."
-    score = 80
-    return user, answer, score
+    openApiURL = "http://aiopen.etri.re.kr:8000/WiseASR/PronunciationKor"
+    #openApiURL = "http://aiopen.etri.re.kr:8000/WiseASR/Pronunciation"
+    accessKey = "ac679469-fbf1-4b08-abd7-f2aba1757ae6"
+    audioFilePath = '/content/001_034.pcm'
+    languageCode = "korean"
+    script = "형제 중에서 맏이가 제일 힘든 것 같아요."
+    file = open(audioFilePath, "rb")
+    audioContents = base64.b64encode(file.read()).decode("utf8")
+    file.close()
+ 
+    requestJson = {
+        "access_key": accessKey,
+        "argument": {
+        "language_code": languageCode,
+        "script": script, 
+        "audio": audioContents
+        }
+    }
+ 
+    http = urllib3.PoolManager()
+    response = http.request(
+        "POST",
+        openApiURL,
+        headers={"Content-Type": "application/json; charset=UTF-8"},
+        body=json.dumps(requestJson)
+    )
+ 
+
+    js = response.data
+    y = json.loads(js)
+    user = y["return_object"]['recognized']
+    score = y["return_object"]['score'] 
+
+    return user, script, score
 
 
 def tokenizing(tokenizer, text):
