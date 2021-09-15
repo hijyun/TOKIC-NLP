@@ -168,10 +168,9 @@ class Member_Test:
     def score_expression(self, user_dict, answer_dict):
         text_len = round(user_dict['text_len'] / answer_dict['text_len'] * 100)
         word_len = round(user_dict['word_len'] / answer_dict['word_len'] * 100)
-        sent_len = round(user_dict['sent_len'] / answer_dict['sent_len'] * 100)
         avg_len = round(user_dict['avg_len'] / answer_dict['avg_len'] * 100)
 
-        score = round(0.15 * (text_len + sent_len) + 0.35 * (word_len + avg_len))
+        score = round(0.15 * (text_len) + 0.35 * (word_len + avg_len))
 
         if score > 100:  # 사용자가 모범답안보다 문장,단어를 더 풍부하게 사용한 경우
             score = 100
