@@ -12,21 +12,21 @@ import json
 import base64
 
 class Member_Test:
-
     def __init__(self):
         self.test_type = "test"
 
     # raw data 추출을 위한 전처리
-    def processing_audio(audioFilePath):
+    def processing_audio(self,audioFilePath):
 
-        audio_segment = AudioSegment.from_mp3(audioFilePath)  # audio 파일을 ms단위로 분해
+        audio_segment = AudioSegment.from_file(audioFilePath)  # audio 파일을 ms단위로 분해
         audio_segment = audio_segment.set_frame_rate(16000)  # sampling rate 16000으로 설정
         audio_segment = audio_segment.set_channels(1)  # channel을 1로 설정
 
         return audio_segment
 
     # 침묵 구간을 측정
-    def get_silence(self,user_answer, threshold, interval):
+    @staticmethod
+    def get_silence(user_answer, threshold, interval):
 
         # audio를 interval기준으로 into chunks로 분리
         # interval 1이면 1 m/s
@@ -41,21 +41,22 @@ class Member_Test:
 
         return silence_length
 
-    def myrange(self, start, end, step):
+    @staticmethod
+    def myrange(start, end, step):
         r = start
         while(r<end):
             yield r
             r += step
 
     # 유창성 평가
-    def score_fluency(self, audio):
+    def score_fluency(self, audio_segment):
         threshold = -80
         interval = 1
-        user_silence = get_silence(audio, threshold, interval)  # 사용자의 침묵 시간
+        user_silence = Member_Test.get_silence(audio_segment, threshold, interval)  # 사용자의 침묵 시간
 
         sec_rate = round(user_silence / len(audio_segment) * 100)
         rate_list = [i for i in range(33, 101, 1)]  # 침묵 시간 비율
-        score_list = [round(s) for s in myrange(0, 100, round(100 / 67, 2))]
+        score_list = [round(s) for s in Member_Test.myrange(0, 100, round(100 / 67, 2))]
         score_list.reverse()
         score_dict = dict(zip(rate_list, score_list))  # 점수로 변환할 딕셔너리
 
@@ -82,7 +83,8 @@ class Member_Test:
         return audioContents
 
     # 발음평가 API 사용
-    def API(self, audioContent, script=None):
+    @staticmethod
+    def API(audioContent, script=None):
 
         openApiURL = "http://aiopen.etri.re.kr:8000/WiseASR/PronunciationKor"
         accessKey = "ac679469-fbf1-4b08-abd7-f2aba1757ae6"
@@ -118,7 +120,7 @@ class Member_Test:
         final_score = 0
 
         for audioContent in audioContents:
-            user, score = API(audioContent)
+            user, score = Member_Test.API(audioContent)
 
             if user:
                 user_answer += user
@@ -158,9 +160,9 @@ class Member_Test:
 
         # 토크나이징된 리스트에 대한 각 길이를 저장
         word_len_list = [len(t) for t in token]
-
+        sent_len = len(token) # 5초 길이 텍스트 수
         word_len = sum(word_len_list)  # 총 단어 수
-        avg_len = word_len // sent_len  # 문장별 평균 단어 수
+        avg_len = word_len // sent_len  # 5초 당 평균 단어 수
 
         return {'text_len': text_len, 'word_len': word_len, 'avg_len': avg_len}
 
@@ -170,7 +172,7 @@ class Member_Test:
         word_len = round(user_dict['word_len'] / answer_dict['word_len'] * 100)
         avg_len = round(user_dict['avg_len'] / answer_dict['avg_len'] * 100)
 
-        score = round(0.15 * (text_len) + 0.35 * (word_len + avg_len))
+        score = round((0.15 * text_len) + 0.35 * (word_len + avg_len))
 
         if score > 100:  # 사용자가 모범답안보다 문장,단어를 더 풍부하게 사용한 경우
             score = 100
@@ -178,7 +180,8 @@ class Member_Test:
         return score
 
     # 텍스트 유사도 함수
-    def text_similarity(self, user_all_token, answer_all_token):
+    @staticmethod
+    def text_similarity(user_all_token, answer_all_token):
         user = ' '.join(user_all_token)
         answer = ' '.join(answer_all_token)
         sent = (user, answer)
@@ -189,14 +192,14 @@ class Member_Test:
         return round(distance)
 
     # 모범 답안 유사도 평가
-    def score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns):
-        all_sim = text_similarity(user_all_token, answer_all_token)
-        nouns_sim = text_similarity(user_nouns, answer_nouns)
+    def score_similarity(self,user_all_token, user_nouns, answer_all_token, answer_nouns):
+        all_sim = Member_Test.text_similarity(user_all_token, answer_all_token)
+        nouns_sim = Member_Test.text_similarity(user_nouns, answer_nouns)
 
         return (all_sim + nouns_sim) // 2
 
     # 주제의 연관성 평가
-    def score_relevance(model, answer_keyword, user_keyword):
+    def score_relevance(self,model, answer_keyword, user_keyword):
         sim_list = []
 
         for a in answer_keyword:
@@ -206,31 +209,36 @@ class Member_Test:
                 except KeyError:
                     pass
 
-        key_sim = text_similarity(user_keyword, answer_keyword)
+        key_sim = Member_Test.text_similarity(user_keyword, answer_keyword)
         score = round((sum(sim_list) / len(sim_list)) * 50 + (key_sim * 0.5))
 
         return score
 
-    def evaluate(self, audio_file, answer):
-        audio_segment = processing_audio(audio_file)
-        audioContents = segment(audio_segment, interval=5000)
 
-        user, score = score_pronunciation(audioContents)
-        komoran = Komoran()
-        model = Word2Vec.load('model/ko.bin')
+def evaluate(audio_file, answer):
+    test = Member_Test()
+    audio_segment = test.processing_audio(audio_file)
+    audioContents = test.segment(audio_segment, interval=5000)
 
-        user_token, user_nouns, user_all_token = tokenizing(komoran, user)
-        answer_token, answer_nouns, answer_all_token = tokenizing(komoran, answer)
-        user_dict = expression(user, user_token, user_all_token)
-        answer_dict = expression(answer, answer_token, answer_all_token)
+    user, score = test.score_pronunciation(audioContents)
+    komoran = Komoran()
+    model = Word2Vec.load('model/ko.bin')
 
-        answer_keyword = keyword(answer_nouns)
-        user_keyword = keyword(user_nouns)
+    user_token, user_nouns, user_all_token = test.tokenizing(komoran, user)
+    answer_token, answer_nouns, answer_all_token = test.tokenizing(komoran, answer)
+    user_dict = test.expression(user, user_token, user_all_token)
+    answer_dict = test.expression(answer, answer_token, answer_all_token)
 
-        flu = score_fluency(audio_segment)
-        pro = score
-        exp = score_expression(user_dict, answer_dict)
-        sim = score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
-        rel = score_relevance(model, answer_keyword, user_keyword)
+    answer_keyword = test.keyword(answer_nouns)
+    user_keyword = test.keyword(user_nouns)
 
-        return dict(zip(['유창성', '발음평가', '표현력', '유사도', '주제의 연관성'], [flu, pro, exp, sim, rel]))
+    flu = test.score_fluency(audio_segment)
+    pro = score
+    exp = test.score_expression(user_dict, answer_dict)
+    sim = test.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
+    rel = test.score_relevance(model, answer_keyword, user_keyword)
+
+    return dict(zip(['유창성', '발음평가', '표현력', '유사도', '주제의 연관성'], [flu, pro, exp, sim, rel]))
+
+answer = '제 취미는 영화보기에요.저는 시간있을 때 영화관에 가요. 재미있는 영화를 봐요.'
+print(evaluate('test/TEST1.mp3', answer))
