@@ -1,7 +1,6 @@
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 from nltk.probability import FreqDist
 import requests
 from pydub import AudioSegment
@@ -162,8 +161,7 @@ class Member_Test:
         # 토크나이징된 리스트에 대한 각 길이를 저장
         word_len_list = [len(t) for t in token]
         sent_len = len(token) # 5초 길이 텍스트 수
-        word_len = sum(word_len_list)  # 총 단어 수
-        avg_len = word_len // sent_len  # 5초 당 평균 단어 수
+        avg_len = sum(word_len_list) // sent_len  # 5초 당 평균 단어 수
 
         return {'text_len': text_len, 'word_len': word_len, 'avg_len': avg_len}
 
@@ -212,36 +210,44 @@ class Member_Test:
 
 
     def evaluate(self, audio_file, answer, komoran):
-        audio_segment = self.processing_audio(audio_file)
-        audioContents = self.segment(audio_segment, interval=5000)
+        try:
+            audio_segment = self.processing_audio(audio_file)
+            audioContents = self.segment(audio_segment, interval=5000)
 
-        user, score = self.score_pronunciation(audioContents)
+            user, score = self.score_pronunciation(audioContents)
 
-        user_token, user_nouns, user_all_token = self.tokenizing(komoran, user)
-        answer_token, answer_nouns, answer_all_token = self.tokenizing(komoran, answer)
-        user_dict = self.expression(user, user_token, user_all_token)
-        answer_dict = self.expression(answer, answer_token, answer_all_token)
+            user_token, user_nouns, user_all_token = self.tokenizing(komoran, user)
+            answer_token, answer_nouns, answer_all_token = self.tokenizing(komoran, answer)
+            user_dict = self.expression(user, user_token, user_all_token)
+            answer_dict = self.expression(answer, answer_token, answer_all_token)
 
-        answer_keyword = self.keyword(answer_nouns)
-        user_keyword = self.keyword(user_nouns)
+            answer_keyword = self.keyword(answer_nouns)
+            user_keyword = self.keyword(user_nouns)
 
-        flu = self.score_fluency(audio_segment)
-        pro = score
-        exp = self.score_expression(user_dict, answer_dict)
-        sim = self.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
-        rel = self.score_relevance(answer_keyword, user_keyword)
+            flu = self.score_fluency(audio_segment)
+            pro = score
+            exp = self.score_expression(user_dict, answer_dict)
+            sim = self.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
+            rel = self.score_relevance(answer_keyword, user_keyword)
 
-        return dict(
-            zip(['fluency', 'pronunciation', 'expression', 'similarity', 'correlation'], [flu, pro, exp, sim, rel]))
+            return dict(zip(['fluency', 'pronunciation', 'expression', 'similarity', 'correlation'], [flu, pro, exp, sim, rel]))
+        except:
+            print('채점 실패')
+            return None
+
 
 '''
 import time
+
 start = time.time()
+from konlpy.tag import Komoran
+
+komoran = Komoran()
 answer = '제 취미는 영화보기에요.저는 시간있을 때 영화관에 가요. 재미있는 영화를 봐요.'
 fname = '/Users/jihyun/project/tokic/score/test/TEST1.mp3'
 # 모의고사 점수내기
 member_test_score = Member_Test()
-print(member_test_score.evaluate(fname,answer))
+print(member_test_score.evaluate(fname,answer,komoran))
 
 print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
 '''

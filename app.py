@@ -33,7 +33,11 @@ def hello_post():
     fname = '/Users/jihyun/project/tokic/score/test/TEST1.mp3'
     member_test_score = score.Member_Test()
     output = member_test_score.evaluate(fname,data['answer'],komoran)
-    return jsonify(output)
+    if output:
+        return jsonify(output)
+    else:
+        print('채점 실패')
+        return None
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5000, debug=True)

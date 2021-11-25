@@ -11,8 +11,9 @@ if r:
 print(r)
 
 
-
 url = 'http://localhost:5000/score'
 answer = '제 취미는 영화보기에요.저는 시간있을 때 영화관에 가요. 재미있는 영화를 봐요.'
-r = requests.post(url, json={'answer': answer}).json()
+r = requests.post(url, json={'answer': answer})
+if r:
+    r = r.json()
 print(r)
