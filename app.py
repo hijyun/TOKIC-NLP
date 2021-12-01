@@ -27,17 +27,29 @@ def sim_score():
     else:
         return None
 
-@app.route('/score', methods=['POST'])
-def hello_post():
+@app.route('/pcm-score', methods=['GET'])
+def get_score():
     data = request.get_json(force=True)
-    fname = '/Users/jihyun/project/tokic/score/test/TEST1.mp3'
-    member_test_score = score.Member_Test()
-    output = member_test_score.evaluate(fname,data['answer'],komoran)
+    test_score = score.Member_Test()
+    output = test_score.pcm_evaluate(data['pcm'], data['answer'],komoran)
+
     if output:
         return jsonify(output)
     else:
         print('채점 실패')
-        return None
+        return {'similarity':0, 'pronunciation':0,'expression':0,'relevance':0}
+
+@app.route('/score', methods=['POST'])
+def hello_post():
+    data = request.get_json(force=True)
+    test_score = score.Member_Test()
+    output = test_score.evaluate(data['audio_path'], data['answer'],komoran)
+
+    if output:
+        return jsonify(output)
+    else:
+        print('채점 실패')
+        return {'similarity':0, 'pronunciation':0,'expression':0,'relevance':0}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=5000, debug=True)
