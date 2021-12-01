@@ -236,18 +236,26 @@ class Member_Test:
             return {'similarity':0, 'pronunciation':0, 'fluency':0,'expression':0,'relevance':0}
 
 
-'''
-import time
+    def pcm_evaluate(self, audio_segment, audioContents, answer, komoran):
+        #try:
+        user, score = self.score_pronunciation(audioContents)
 
-start = time.time()
-from konlpy.tag import Komoran
+        user_token, user_nouns, user_all_token = self.tokenizing(komoran, user)
+        answer_token, answer_nouns, answer_all_token = self.tokenizing(komoran, answer)
+        user_dict = self.expression(user, user_token, user_all_token)
+        answer_dict = self.expression(answer, answer_token, answer_all_token)
 
-komoran = Komoran()
-answer = '제 취미는 영화보기에요.저는 시간있을 때 영화관에 가요. 재미있는 영화를 봐요.'
-fname = '/Users/jihyun/project/tokic/score/test/TEST1.mp3'
-# 모의고사 점수내기
-member_test_score = Member_Test()
-print(member_test_score.evaluate(fname,answer,komoran))
+        answer_keyword = self.keyword(answer_nouns)
+        user_keyword = self.keyword(user_nouns)
 
-print("time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간
-'''
+        flu = self.score_fluency(audio_segment)
+        pro = score
+        exp = self.score_expression(user_dict, answer_dict)
+        sim = self.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
+        rel = self.score_relevance(answer_keyword, user_keyword)
+
+        return dict(zip(['fluency', 'pronunciation', 'expression', 'similarity', 'correlation'], [flu, pro, exp, sim, rel]))
+        #except:
+        #    print('채점 실패')
+        #    return {'similarity':0, 'pronunciation':0, 'fluency':0,'expression':0,'relevance':0}
+
