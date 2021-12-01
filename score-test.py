@@ -18,5 +18,5 @@ print("오디오 채점 time :", time.time() - start)  # 현재시각 - 시작�
 start = time.time()
 audio_segment = member_test_score.processing_audio(fname)
 audioContents = member_test_score.segment(audio_segment, interval=5000)
-print(member_test_score.pcm_evaluate(audio_segment, audioContents,answer,komoran))
+print(member_test_score.pcm_evaluate(audioContents,answer,komoran))
 print("pcm 채점 time :", time.time() - start)  # 현재시각 - 시작시간 = 실행 시간

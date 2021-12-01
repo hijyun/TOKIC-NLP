@@ -236,26 +236,25 @@ class Member_Test:
             return {'similarity':0, 'pronunciation':0, 'fluency':0,'expression':0,'relevance':0}
 
 
-    def pcm_evaluate(self, audio_segment, audioContents, answer, komoran):
-        #try:
-        user, score = self.score_pronunciation(audioContents)
+    def pcm_evaluate(self, audioContents, answer, komoran):
+        try:
+            user, pro = self.score_pronunciation(audioContents)
 
-        user_token, user_nouns, user_all_token = self.tokenizing(komoran, user)
-        answer_token, answer_nouns, answer_all_token = self.tokenizing(komoran, answer)
-        user_dict = self.expression(user, user_token, user_all_token)
-        answer_dict = self.expression(answer, answer_token, answer_all_token)
+            user_token, user_nouns, user_all_token = self.tokenizing(komoran, user)
+            answer_token, answer_nouns, answer_all_token = self.tokenizing(komoran, answer)
+            user_dict = self.expression(user, user_token, user_all_token)
+            answer_dict = self.expression(answer, answer_token, answer_all_token)
 
-        answer_keyword = self.keyword(answer_nouns)
-        user_keyword = self.keyword(user_nouns)
+            answer_keyword = self.keyword(answer_nouns)
+            user_keyword = self.keyword(user_nouns)
 
-        flu = self.score_fluency(audio_segment)
-        pro = score
-        exp = self.score_expression(user_dict, answer_dict)
-        sim = self.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
-        rel = self.score_relevance(answer_keyword, user_keyword)
+            # 유창성 어떻게 넣을지는 나중에 생각해보기
+            exp = self.score_expression(user_dict, answer_dict)
+            sim = self.score_similarity(user_all_token, user_nouns, answer_all_token, answer_nouns)
+            rel = self.score_relevance(answer_keyword, user_keyword)
 
-        return dict(zip(['fluency', 'pronunciation', 'expression', 'similarity', 'correlation'], [flu, pro, exp, sim, rel]))
-        #except:
-        #    print('채점 실패')
-        #    return {'similarity':0, 'pronunciation':0, 'fluency':0,'expression':0,'relevance':0}
+            return dict(zip(['pronunciation', 'expression', 'similarity', 'correlation'], [pro, exp, sim, rel]))
+        except:
+            print('채점 실패')
+            return {'similarity':0, 'pronunciation':0,'expression':0,'relevance':0}
 
