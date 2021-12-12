@@ -1,14 +1,3 @@
-# 채점 알고리즘
+# TOKIC - 한국어 회화 연습 및 평가 앱 개발 프로젝트
 
-## 파이썬 버전
-+ python : 3.8.1
-
-## 라이브러리 버전
-+ gensim : 3.8.1
-+ sklearn : 0.0
-+ pydub : 0.25.1
-+ Konlpy : 0.5.2
-+ nltk : 3.6.2
-
-## Word2Vec 모델
-* 한국어 위키피디아 말뭉치를 사용해 학습 
+![구성도](https://user-images.githubusercontent.com/54613024/145710701-900a1a79-6520-47ad-ac40-f39fa13e2e03.png)
