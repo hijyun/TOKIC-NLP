@@ -26,6 +26,12 @@
 <br>
 
 ## 채점 알고리즘 사용법
+```
+$ git clone https://github.com/TOKIC-test/Tokic_NLP.git
+$ cd Tokic_NLP
+$ flask run
+```
+
 ```python
 import requests
 import score
