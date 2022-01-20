@@ -16,7 +16,8 @@
 
 ## 🗺  서비스 구성도
 <div align="center">
-<img width="700" alt="서비스구성도" src="https://user-images.githubusercontent.com/54613024/150269912-805ca95e-dc82-48b6-a388-af1690c1c86a.png">
+<img width="700" alt="서비스구성도" src="https://user-images.githubusercontent.com/54613024/150285187-cb4b5348-e99e-4343-b5f9-27612b6614b9.png">
+
 </div>
 
 <br>
