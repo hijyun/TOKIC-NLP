@@ -36,6 +36,7 @@
 ## 채점 알고리즘 사용법
 ```
 $ git clone https://github.com/TOKIC-test/Tokic_NLP.git
+$ pip install -r requirements.txt
 $ cd Tokic_NLP
 $ flask run
 ```
