@@ -25,6 +25,24 @@
 5. **주제의 연관성** : 사전에 학습한 Word2Vec 모델을 사용해 사용자의 답변에서 얻어낸 키워드와 모범답안의 키워드간 거리를 계산.
 <br>
 
+## 채점 알고리즘 사용법
+```python
+import requests
+import score
+
+
+url = 'http://localhost:5000/score'
+pcm_score = score.Member_Test()
+answer = '모범답안 script를 작성해주세요.' # 모범 답안 script
+audio_file = '/Users/audio_file.mp3' # audio경로를 전달
+
+r = requests.post(url, json={'audio_path':audio_file,'answer': answer})
+if r:
+    r = r.json()
+    print('test점수 결과 : ',r)
+```
+<br>
+
 ## 관련 문서  
 [한이음 한국정보처리학회 2021 추계학술대회 논문](https://www.koreascience.or.kr/article/CFKO202133648924945.page)
 <br>
