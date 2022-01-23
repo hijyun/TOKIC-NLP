@@ -44,11 +44,8 @@ $ flask run
 
 ```python
 import requests
-import score
-
 
 url = 'http://localhost:5000/score'
-pcm_score = score.Member_Test()
 answer = '모범답안 script를 작성해주세요.' # 모범 답안 script
 audio_file = '/Users/audio_file.mp3' # audio경로를 전달
 
